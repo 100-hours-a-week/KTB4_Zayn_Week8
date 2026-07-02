@@ -93,6 +93,7 @@ public class PostService {
         postContentRepository.save(postContent);
 
         userStat.recordPostCreation(now);
+        tempPost.connectPost(savedPost.getId());
 
         return savedPost.getId();
     }
