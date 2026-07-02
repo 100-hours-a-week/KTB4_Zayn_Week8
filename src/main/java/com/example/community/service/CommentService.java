@@ -34,10 +34,15 @@ public class CommentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
+        Comment parentComment = commentRequestDTO.getParentCommentId() == null
+                ? null
+                : commentRepository.findById(commentRequestDTO.getParentCommentId())
+                  .orElseThrow(() -> new NotFoundException("comment_not_found"));
+
         Comment comment = new Comment(
                 post,
                 user,
-                null,
+                parentComment,
                 commentRequestDTO.getCommentContent()
         );
 
