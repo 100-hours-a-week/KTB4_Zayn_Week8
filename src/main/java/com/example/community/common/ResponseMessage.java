@@ -31,7 +31,8 @@ public enum ResponseMessage {
     PASSWORD_UPDATE_SUCCESS("password_update_success"),
     USER_DELETE_SUCCESS("user_delete_success"),
     TEMP_POST_CREATE_SUCCESS("temp_post_create_success"),
-    GET_COMMENTS_SUCCESS("get_comments_success");
+    GET_COMMENTS_SUCCESS("get_comments_success"),
+    REPORT_POST_SUCCESS("report_post_success");
 
 
     private final String message;

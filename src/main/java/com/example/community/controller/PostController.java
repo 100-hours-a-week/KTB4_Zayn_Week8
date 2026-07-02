@@ -113,11 +113,11 @@ public class PostController { // 게시글 관련 요청 처리
 
     @PostMapping("/{post_id}/report")
     public ResponseEntity<?> reportPost(@PathVariable("post_id") Long postId, HttpServletRequest request,
-                                        PostReportRequestDTO postReportRequestDTO) {
+                                        @RequestBody @Valid PostReportRequestDTO postReportRequestDTO) {
         Long userId = tokenProvider.getUserId(request);
         postService.reportPost(postId, userId, postReportRequestDTO.getReason());
 
-        return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.LIKE_UPDATE_SUCCESS.getMessage(),
+        return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.REPORT_POST_SUCCESS.getMessage(),
                 Map.of(
                         "report_status", ReportStatus.PENDING.getStatus()
                 )));
