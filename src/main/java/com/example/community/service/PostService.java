@@ -1,5 +1,6 @@
 package com.example.community.service;
 
+import com.example.community.dto.LikeResponseDTO;
 import com.example.community.dto.PostRequestDTO;
 import com.example.community.entity.history.post.PostHistory;
 import com.example.community.entity.main.post.Post;
@@ -268,7 +269,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long toggleLikeProcess(Long postId, Long userId) {
+    public LikeResponseDTO toggleLikeProcess(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("post_not_found"));
 
@@ -287,13 +288,13 @@ public class PostService {
             postLikeRepository.delete(postLike.get());
             post.decreaseLikeCount();
 
-            return post.getLikeCount();
+            return new LikeResponseDTO(post.getLikeCount(), false);
         }
 
         postLikeRepository.save(new PostLike(user, post));
         post.increaseLikeCount();
 
-        return post.getLikeCount();
+        return new LikeResponseDTO(post.getLikeCount(), true);
     }
 
     @Transactional

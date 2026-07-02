@@ -3,6 +3,7 @@ package com.example.community.controller;
 import com.example.community.common.ReportStatus;
 import com.example.community.common.ResponseFormat;
 import com.example.community.common.ResponseMessage;
+import com.example.community.dto.LikeResponseDTO;
 import com.example.community.dto.PostReportRequestDTO;
 import com.example.community.security.TokenProvider;
 import com.example.community.service.PostService;
@@ -102,12 +103,12 @@ public class PostController { // 게시글 관련 요청 처리
     public ResponseEntity<?> addLike(@PathVariable("post_id") Long postId, HttpServletRequest request) {
 
         Long userId = tokenProvider.getUserId(request);
-        Long likeCount = postService.toggleLikeProcess(postId, userId);
+        LikeResponseDTO likeResponseDTO = postService.toggleLikeProcess(postId, userId);
 
         return ResponseEntity.ok(ResponseFormat.of(ResponseMessage.LIKE_UPDATE_SUCCESS.getMessage(),
                 Map.of(
-                        "like_button_click", true,
-                        "like_count", likeCount
+                        "like_count", likeResponseDTO.getLikeCount(),
+                        "increase_like_count", likeResponseDTO.isLike()
                 )));
     }
 
