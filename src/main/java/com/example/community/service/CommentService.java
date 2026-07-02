@@ -31,6 +31,11 @@ public class CommentService {
     public Long createCommentProcess(Long postId, CommentRequestDTO commentRequestDTO, Long userId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("post_not_found"));
+
+        if (post.getDeletedAt() != null) {
+            throw new NotFoundException("post_not_found");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
 
@@ -61,8 +66,16 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("comment_not_found"));
 
+        if (comment.getPost().getDeletedAt() != null) {
+            throw new NotFoundException("post_not_found");
+        }
+
         if (!comment.getPost().getId().equals(postId)) {
             throw new NotFoundException("comment_not_in_post");
+        }
+
+        if (comment.getDeletedAt() != null) {
+            throw new NotFoundException("comment_not_found");
         }
 
         if (!comment.getUser().getId().equals(userId)) {
@@ -87,6 +100,10 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException("comment_not_found"));
 
+        if (comment.getPost().getDeletedAt() != null) {
+            throw new NotFoundException("post_not_found");
+        }
+
         if (comment.getDeletedAt() != null) {
             throw new NotFoundException("comment_not_found");
         }
@@ -108,6 +125,14 @@ public class CommentService {
         if (!postRepository.existsById(postId)) {
             throw new NotFoundException("post_not_found");
         }
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException("post_not_found"));
+
+        if (post.getDeletedAt() != null) {
+            throw new NotFoundException("post_not_found");
+        }
+
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("user_not_found"));
