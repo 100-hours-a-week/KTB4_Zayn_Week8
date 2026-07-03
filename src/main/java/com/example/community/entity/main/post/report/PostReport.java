@@ -45,4 +45,12 @@ public class PostReport {
         this.reportedAt = LocalDateTime.now();
         this.status = ReportStatus.PENDING.getStatus();
     }
+
+    public void accept() {
+        this.status = ReportStatus.ACCEPTED.getStatus();
+    }
+
+    public void reject() {
+        this.status = ReportStatus.REJECTED.getStatus();
+    }
 }

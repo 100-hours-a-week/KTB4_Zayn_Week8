@@ -107,4 +107,13 @@ public class Post {
             this.commentCount--;
         }
     }
+
+    public void blind() {
+        this.blindedAt = LocalDateTime.now();
+    }
+
+    public void unBlind() {
+        this.blindedAt = null;
+        this.reportCount = 0;
+    }
 }

@@ -32,7 +32,12 @@ public enum ResponseMessage {
     USER_DELETE_SUCCESS("user_delete_success"),
     TEMP_POST_CREATE_SUCCESS("temp_post_create_success"),
     GET_COMMENTS_SUCCESS("get_comments_success"),
-    REPORT_POST_SUCCESS("report_post_success");
+    REPORT_POST_SUCCESS("report_post_success"),
+    ADMIN_PAGE_LOAD("admin_page_load"),
+    REPORTED_POSTS_PAGE_LOAD("reported_posts_page_load"),
+    POST_REPORT_DETAILS_PAGE_LOAD("post_report_details_page_load"),
+    POST_BLIND_SUCCESS("post_blind_success"),
+    REJECT_REPORTS_SUCCESS("reject_reports_success");
 
 
     private final String message;
