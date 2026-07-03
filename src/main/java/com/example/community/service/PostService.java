@@ -14,10 +14,7 @@ import com.example.community.entity.main.post.view.PostView;
 import com.example.community.entity.main.post.view.PostViewId;
 import com.example.community.entity.main.user.User;
 import com.example.community.entity.main.user.UserStat;
-import com.example.community.exception.AuthorizationException;
-import com.example.community.exception.DuplicateResourceException;
-import com.example.community.exception.InvalidRequestException;
-import com.example.community.exception.NotFoundException;
+import com.example.community.exception.*;
 import com.example.community.repository.history.post.PostHistoryRepository;
 import com.example.community.repository.main.post.PostContentRepository;
 import com.example.community.repository.main.post.PostRepository;
@@ -144,6 +141,10 @@ public class PostService {
 
         if (post.getDeletedAt() != null) {
             throw new NotFoundException("post_not_found");
+        }
+
+        if (post.getBlindedAt() != null) {
+            throw new BlindedPostAccessException("can't_access_to_blinded_post");
         }
 
         PostContent postContent = postContentRepository.findById(postId)

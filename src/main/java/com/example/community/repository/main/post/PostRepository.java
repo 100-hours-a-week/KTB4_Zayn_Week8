@@ -15,12 +15,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     from Post p
                     join fetch p.user
                     where p.deletedAt is null
+                    and p.blindedAt is null
                     order by p.createdAt desc
                     """,
             countQuery = """
                     select count(p)
                     from Post p
                     where p.deletedAt is null
+                    and p.blindedAt is null
                     """
     )
     Page<Post> findPageWithUser(Pageable pageable);
