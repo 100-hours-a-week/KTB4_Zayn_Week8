@@ -142,6 +142,10 @@ public class PostService {
         Post post = postRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new NotFoundException("post_not_found"));
 
+        if (post.getDeletedAt() != null) {
+            throw new NotFoundException("post_not_found");
+        }
+
         PostContent postContent = postContentRepository.findById(postId)
                 .orElseThrow(() -> new NotFoundException("post_content_not_found"));
 
@@ -386,4 +390,8 @@ public class PostService {
         response.put("has_temp_post", false);
         return response;
     }
+
+//    private boolean isBlinded() {
+//
+//    }
 }
