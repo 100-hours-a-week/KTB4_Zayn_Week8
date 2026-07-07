@@ -19,4 +19,4 @@
 
 ## 개발 과정 기록 및 회고
 
-// 링크 추가 예정
+https://app.notion.com/p/8-38fa9922979280ca9aafd63346cc2d2f?source=copy_link
