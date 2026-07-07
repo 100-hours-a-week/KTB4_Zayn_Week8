@@ -1,5 +1,6 @@
 package com.example.community.service;
 
+import com.example.community.common.UserRole;
 import com.example.community.dto.LoginRequestDTO;
 import com.example.community.entity.main.auth.RefreshToken;
 import com.example.community.entity.main.user.User;
@@ -33,7 +34,7 @@ public class AuthService {
         User user = authenticateUser(loginRequestDTO.getUserEmail(), loginRequestDTO.getUserPassword());
 
         // 2. 액세스 토큰 및 리프래시 토큰 생성
-        String accessToken = tokenProvider.createAccessToken(user.getId());
+        String accessToken = tokenProvider.createAccessToken(user.getId(), user.getRole());
         RefreshTokenInfo refreshTokenInfo = tokenProvider.createRefreshToken(user.getId());
 
         RefreshToken refreshToken = new RefreshToken(
@@ -78,7 +79,7 @@ public class AuthService {
             throw new ExpiredRefreshTokenException("expired_refresh_token"); // 해당 예외 발생 시 롤백 안되게 설정
         }
 
-        return tokenProvider.createAccessToken(userId);
+        return tokenProvider.createAccessToken(userId, refreshToken.getUser().getRole());
     }
 
     private User authenticateUser(String userEmail, String userPassword) {

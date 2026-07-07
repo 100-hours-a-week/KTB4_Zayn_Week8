@@ -3,8 +3,9 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL,
     password VARCHAR(255),
     nickname VARCHAR(50) NOT NULL,
-    image VARCHAR(500),
+    image VARCHAR(500) DEFAULT '/images/default-profile.png',
     deleted_at TIMESTAMP,
+    role VARCHAR(20) NOT NULL DEFAULT 'ROLE_USER',
 
     CONSTRAINT pk_users PRIMARY KEY (id),
     CONSTRAINT uk_users_email UNIQUE (email),

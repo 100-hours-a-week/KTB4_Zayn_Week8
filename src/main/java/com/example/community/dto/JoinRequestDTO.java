@@ -36,6 +36,5 @@ public class JoinRequestDTO {
     private String userPasswordCheck;
 
     @JsonProperty("user_image")
-    @NotBlank(message = "user_image_required")
     private String userImage;
 }

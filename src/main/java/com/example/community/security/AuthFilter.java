@@ -8,11 +8,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -27,34 +33,26 @@ public class AuthFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain)
             throws IOException, ServletException {
 
-        String authorization = request.getHeader("Authorization");
+        String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        if (isH2ConsoleRequest(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // login, join (GET, POST) 요청이면 통과
         if (isAuthPageRequest(request)) {
             handleAuthPageRequest(authorization, request, response, filterChain);
             return;
         }
 
-        // token 재발급 요청이면 통과
-        if (isTokenRefreshRequest(request)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        String token = extractToken(authorization);
 
-        // 이외 모든 요청에 유효한 토큰이 아니면 권한 없음 응답 반환
-        if (!authenticateAccessToken(authorization)) {
-            setUnauthorizedResponse(response);
-            return;
+        if (token != null && tokenProvider.validateAccessToken(token)) {
+            String role = tokenProvider.getRole(token);
+            Long userId = tokenProvider.getUserId(token);
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            userId,
+                            null,
+                            List.of(new SimpleGrantedAuthority(role)));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
@@ -64,28 +62,38 @@ public class AuthFilter extends OncePerRequestFilter {
         String method = request.getMethod();
         String path = request.getRequestURI();
 
-        return ((method.equals("GET") || method.equals("POST"))
-                && (path.equals("/login") || path.equals("/join")));
+        return ("GET".equals(method) || "POST".equals(method))
+                && ("/login".equals(path) || "/join".equals(path));
     }
 
-    private void handleAuthPageRequest(String authorization, HttpServletRequest request,
-                                       HttpServletResponse response, FilterChain filterChain)
+    private void handleAuthPageRequest(String authorization,
+                                       HttpServletRequest request,
+                                       HttpServletResponse response,
+                                       FilterChain filterChain)
             throws IOException, ServletException {
-        if (authenticateAccessToken(authorization)) { // 유효한 토큰이 있는 경우
-            setAuthorizedResponse(response); // /posts로
+
+        String token = extractToken(authorization);
+
+        if (token != null && tokenProvider.validateAccessToken(token)) {
+            setAuthorizedResponse(response);
             return;
         }
 
-        filterChain.doFilter(request, response); // 유효 토큰이 없는 경우, 필터 종료
+        filterChain.doFilter(request, response);
     }
 
-    private boolean isTokenRefreshRequest(HttpServletRequest request) {
-        return request.getMethod().equals("POST") && request.getRequestURI().equals("/token");
+    private String extractToken(String authorization) {
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+            return null;
+        }
+
+        return authorization.substring(7);
     }
 
     private void setAuthorizedResponse(HttpServletResponse response) throws IOException {
-        response.setStatus(HttpServletResponse.SC_OK); // 200
-        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
 
         ResponseFormat<Map<String, String>> responseBody = ResponseFormat.of(
                 ResponseMessage.ALREADY_AUTHORIZED.getMessage(),
@@ -95,29 +103,11 @@ public class AuthFilter extends OncePerRequestFilter {
         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
     }
 
-    private void setUnauthorizedResponse(HttpServletResponse response) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401
-        response.setContentType("application/json;charset=UTF-8");
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
 
-        ResponseFormat<Map<String, String>> responseBody = ResponseFormat.of(
-                ResponseMessage.UNAUTHORIZED.getMessage(),
-                Map.of("redirect_url", "/login")
-        );
-
-        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
-    }
-
-    private boolean authenticateAccessToken(String authorization) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            return false;
-        }
-
-        String token = authorization.substring(7);
-
-        return tokenProvider.validateAccessToken(token);
-    }
-
-    private boolean isH2ConsoleRequest(HttpServletRequest request) {
-        return request.getRequestURI().startsWith("/h2-console");
+        return path.startsWith("/h2-console")
+                || "OPTIONS".equals(request.getMethod());
     }
 }

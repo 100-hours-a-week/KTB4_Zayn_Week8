@@ -28,13 +28,14 @@ public class JWTProvider implements TokenProvider {
     }
 
     @Override
-    public String createAccessToken(Long userId) {
+    public String createAccessToken(Long userId, String role) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_MILLIS);
 
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("type", "access")
+                .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(secretKey)
@@ -92,6 +93,12 @@ public class JWTProvider implements TokenProvider {
     public Long getUserId(String token) {
         Claims claims = parseClaims(token);
         return Long.valueOf(claims.getSubject());
+    }
+
+    @Override
+    public String getRole(String token) {
+        Claims claims = parseClaims(token);
+        return claims.get("role", String.class);
     }
 
     private Claims parseClaims(String token) {

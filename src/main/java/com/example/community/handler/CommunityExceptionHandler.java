@@ -10,6 +10,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -31,6 +34,16 @@ public class CommunityExceptionHandler {
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
         return ResponseEntity.status(status).body(ResponseFormat.of(message));
+    }
+
+    // 404 - 존재하지 않는 URL
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<?> noResourceFoundException(NoResourceFoundException e) {
+        String message = "not_found_url";
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        return ResponseEntity.status(status).body(ResponseFormat.of(message,
+                Map.of("redirect_url", "/login")));
     }
 
     @ExceptionHandler(CommunityException.class)

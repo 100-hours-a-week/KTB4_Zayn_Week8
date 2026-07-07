@@ -1,5 +1,6 @@
 package com.example.community.entity.main.user;
 
+import com.example.community.common.UserRole;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -28,6 +29,9 @@ public class User {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "role", nullable = false, length = 20)
+    private String role = UserRole.USER.getRole();
+
     protected User() {
     }
 
@@ -35,8 +39,14 @@ public class User {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.image = image;
         this.deletedAt = null;
+        this.role = UserRole.USER.getRole();
+
+        if (image != null) {
+            this.image = image;
+            return;
+        }
+        this.image = "/images/default-profile.png";
     }
 
     public void delete() {
